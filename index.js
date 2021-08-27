@@ -116,8 +116,14 @@ class FeedController {
     stopTimer() {
         return __awaiter(this, void 0, void 0, function* () {
             this.swap();
-            yield this.wakeLock.release();
-            this.wakeLock = null;
+            try {
+                yield this.wakeLock.release();
+                this.wakeLock = null;
+            }
+            catch (err) {
+                // The Wake Lock request has failed - usually system related, such as battery.
+                console.log(`${err.name}, ${err.message}`);
+            }
             clearInterval(this.interval);
         });
     }
