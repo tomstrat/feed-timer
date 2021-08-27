@@ -1,10 +1,18 @@
 "use strict";
-var noSleep = require("nosleep.js");
-var ExcelController = /** @class */ (function () {
-    function ExcelController() {
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+class ExcelController {
+    constructor() {
         this.url = "https://script.google.com/macros/s/AKfycbxgxWrVabiImPsUpXTEMdljI5jlFAMt-jBihMKTzOQiSVlJlgF7jGKu3bp27n9sgywh/exec";
     }
-    ExcelController.prototype.submitData = function (payload) {
+    submitData(payload) {
         fetch(this.url, {
             method: "POST",
             headers: {
@@ -15,15 +23,14 @@ var ExcelController = /** @class */ (function () {
                 data: payload
             })
         });
-    };
-    return ExcelController;
-}());
-var FeedController = /** @class */ (function () {
-    function FeedController() {
+    }
+}
+class FeedController {
+    constructor() {
         this.setup();
         this.addEvents();
     }
-    FeedController.prototype.setup = function () {
+    setup() {
         this.start = document.querySelector(".start");
         this.start.style.display = "block";
         this.stop = document.querySelector(".stop");
@@ -43,24 +50,23 @@ var FeedController = /** @class */ (function () {
         this.startTime = "";
         this.buttonState = "start";
         this.excelController = new ExcelController();
-        this.noSleep = new noSleep();
-    };
-    FeedController.prototype.addEvents = function () {
-        var _this = this;
+        this.wakeLock = null;
+    }
+    addEvents() {
         this.start.addEventListener("click", this.startTimer.bind(this));
         this.stop.addEventListener("click", this.stopTimer.bind(this));
         this.reset.addEventListener("click", this.showConfirm.bind(this));
-        this.reset.addEventListener("click", function () {
-            _this.confirmOrigin.dataset.origin = "reset";
+        this.reset.addEventListener("click", () => {
+            this.confirmOrigin.dataset.origin = "reset";
         });
         this.yes.addEventListener("click", this.redirectConfirm.bind(this));
         this.no.addEventListener("click", this.hideConfirm.bind(this));
         this.submit.addEventListener("click", this.showConfirm.bind(this));
-        this.submit.addEventListener("click", function () {
-            _this.confirmOrigin.dataset.origin = "submit";
+        this.submit.addEventListener("click", () => {
+            this.confirmOrigin.dataset.origin = "submit";
         });
-    };
-    FeedController.prototype.swap = function () {
+    }
+    swap() {
         if (this.buttonState === "start") {
             this.buttonState = "stop";
             this.start.style.display = "none";
@@ -71,55 +77,65 @@ var FeedController = /** @class */ (function () {
             this.start.style.display = "block";
             this.stop.style.display = "none";
         }
-    };
-    FeedController.prototype.getTime = function () {
-        var date = new Date();
-        return date.getHours() + ":" + date.getMinutes();
-    };
-    FeedController.prototype.getDate = function () {
-        var date = new Date();
-        return date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear();
-    };
-    FeedController.prototype.startTimer = function () {
-        var _this = this;
-        if (this.startTime === "") {
-            this.startTime = this.getTime();
-        }
-        this.swap();
-        this.noSleep.enable();
-        this.interval = setInterval(function () {
-            _this.time += 1;
-            var mins = Math.floor(_this.time / 60);
-            var seconds = Math.floor(_this.time % 60);
-            if (mins < 10) {
-                mins = "0" + mins;
+    }
+    getTime() {
+        let date = new Date();
+        return `${date.getHours()}:${date.getMinutes()}`;
+    }
+    getDate() {
+        let date = new Date();
+        return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
+    }
+    startTimer() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.startTime === "") {
+                this.startTime = this.getTime();
             }
-            if (seconds < 10) {
-                seconds = "0" + seconds;
+            try {
+                this.wakeLock = yield navigator.wakeLock.request('screen');
             }
-            _this.timer.innerHTML = mins + ":" + seconds;
-        }, 1000);
-    };
-    FeedController.prototype.stopTimer = function () {
-        this.swap();
-        this.noSleep.disable();
-        clearInterval(this.interval);
-    };
-    FeedController.prototype.showConfirm = function () {
+            catch (err) {
+                // The Wake Lock request has failed - usually system related, such as battery.
+                console.log(`${err.name}, ${err.message}`);
+            }
+            this.swap();
+            this.interval = setInterval(() => {
+                this.time += 1;
+                let mins = Math.floor(this.time / 60);
+                let seconds = Math.floor(this.time % 60);
+                if (mins < 10) {
+                    mins = `0${mins}`;
+                }
+                if (seconds < 10) {
+                    seconds = `0${seconds}`;
+                }
+                this.timer.innerHTML = `${mins}:${seconds}`;
+            }, 1000);
+        });
+    }
+    stopTimer() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.swap();
+            yield this.wakeLock.release();
+            this.wakeLock = null;
+            clearInterval(this.interval);
+        });
+    }
+    showConfirm() {
         this.confirm.style.display = "flex";
-    };
-    FeedController.prototype.hideConfirm = function () {
+    }
+    hideConfirm() {
         this.confirm.style.display = "none";
-    };
-    FeedController.prototype.redirectConfirm = function () {
+    }
+    redirectConfirm() {
         if (this.confirmOrigin.dataset.origin === "reset") {
             this.resetTimer();
         }
         else {
             this.submitData();
         }
-    };
-    FeedController.prototype.resetTimer = function () {
+    }
+    resetTimer() {
         this.hideConfirm();
         this.buttonState = "stop";
         this.stopTimer();
@@ -129,8 +145,8 @@ var FeedController = /** @class */ (function () {
         this.volume.value = "";
         this.wee.checked = false;
         this.poo.checked = false;
-    };
-    FeedController.prototype.gatherData = function () {
+    }
+    gatherData() {
         if (this.volume.value === "") {
             this.volume.value = "0";
         }
@@ -142,13 +158,12 @@ var FeedController = /** @class */ (function () {
             wee: this.wee.checked,
             poo: this.poo.checked
         };
-    };
-    FeedController.prototype.submitData = function () {
+    }
+    submitData() {
         this.hideConfirm();
         console.log(this.gatherData());
         this.excelController.submitData(this.gatherData());
         this.resetTimer();
-    };
-    return FeedController;
-}());
-var myFeedTimer = new FeedController();
+    }
+}
+const myFeedTimer = new FeedController();

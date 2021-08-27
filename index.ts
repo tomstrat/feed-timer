@@ -1,4 +1,3 @@
-const noSleep = require("nosleep.js");
 
 interface Payload {
   date: string;
@@ -45,11 +44,11 @@ class FeedController {
   private no!: HTMLDivElement;
   private confirmOrigin!: HTMLDivElement;
   private submit!: HTMLDivElement;
-  private interval!: NodeJS.Timer;
+  private interval!: number;
   private time!: number;
   private startTime!: string;
   private excelController!: ExcelController;
-  private noSleep!: any;
+  private wakeLock!: any;
 
 
   constructor(){
@@ -77,7 +76,7 @@ class FeedController {
     this.startTime = "";
     this.buttonState = "start";
     this.excelController = new ExcelController();
-    this.noSleep = new noSleep();
+    this.wakeLock = null;
   }
 
   private addEvents(){
@@ -117,12 +116,17 @@ class FeedController {
     return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
   }
 
-  private startTimer(){
+  private async startTimer(){
     if(this.startTime === "") {
       this.startTime = this.getTime();
     }
+    try {
+      this.wakeLock = await navigator.wakeLock.request('screen');
+    } catch (err) {
+      // The Wake Lock request has failed - usually system related, such as battery.
+      console.log(`${err.name}, ${err.message}`);
+    }
     this.swap();
-    this.noSleep.enable();
     this.interval = setInterval(() => {
       this.time += 1;
       let mins: number | string = Math.floor(this.time / 60);
@@ -137,9 +141,10 @@ class FeedController {
     }, 1000);
   }
 
-  private stopTimer(){
+  private async stopTimer(){
     this.swap();
-    this.noSleep.disable();
+    await this.wakeLock.release();
+    this.wakeLock = null;
     clearInterval(this.interval);
   }
 
