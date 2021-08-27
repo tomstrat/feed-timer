@@ -2,7 +2,7 @@
 var noSleep = require("nosleep.js");
 var ExcelController = /** @class */ (function () {
     function ExcelController() {
-        this.url = "https://script.google.com/macros/s/AKfycbx-Ncr5-J7qFwV3d_d3cw6gHhulgsCF-hhpjTyoPkC4eOxPmkIzfsGzccNqJxf8Q-Hr/exec";
+        this.url = "https://script.google.com/macros/s/AKfycbxgxWrVabiImPsUpXTEMdljI5jlFAMt-jBihMKTzOQiSVlJlgF7jGKu3bp27n9sgywh/exec";
     }
     ExcelController.prototype.submitData = function (payload) {
         fetch(this.url, {
@@ -146,7 +146,7 @@ var FeedController = /** @class */ (function () {
     FeedController.prototype.submitData = function () {
         this.hideConfirm();
         console.log(this.gatherData());
-        //this.excelController.submitData(this.gatherData());
+        this.excelController.submitData(this.gatherData());
         this.resetTimer();
     };
     return FeedController;
