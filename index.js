@@ -83,7 +83,12 @@ class FeedController {
     }
     getDate() {
         let date = new Date();
-        return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
+        const dateString = date.toLocaleDateString("en-GB", {
+            year: "2-digit",
+            month: "2-digit",
+            day: "2-digit"
+        });
+        return dateString;
     }
     startTimer() {
         return __awaiter(this, void 0, void 0, function* () {
