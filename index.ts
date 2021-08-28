@@ -21,7 +21,6 @@ class ExcelController {
       method: "POST",
       headers: {
         "Content-Type": "text/plain",
-        "Access-Control-Allow-Origin": "*"
       },
       body: JSON.stringify({
         data: payload
@@ -185,6 +184,10 @@ class FeedController {
 
     if(this.volume.value === ""){
       this.volume.value = "0";
+    }
+
+    if(this.startTime === ""){
+      this.startTime = this.getTime();
     }
 
     return {
