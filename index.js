@@ -14,10 +14,9 @@ class ExcelController {
     }
     submitData(payload) {
         fetch(this.url, {
-            mode: "no-cors",
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": "text/plain",
                 "Access-Control-Allow-Origin": "*"
             },
             body: JSON.stringify({
