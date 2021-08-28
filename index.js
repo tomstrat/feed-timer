@@ -162,7 +162,7 @@ class FeedController {
             date: this.getDate(),
             time: this.startTime,
             duration: Math.floor(this.time / 60),
-            volume: this.volume.value,
+            volume: parseInt(this.volume.value),
             wee: this.wee.checked,
             poo: this.poo.checked
         };
