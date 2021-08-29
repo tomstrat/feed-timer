@@ -118,18 +118,8 @@ class FeedController {
         });
     }
     stopTimer() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.swap();
-            try {
-                yield this.wakeLock.release();
-                this.wakeLock = null;
-            }
-            catch (err) {
-                // The Wake Lock request has failed - usually system related, such as battery.
-                console.log(`${err.name}, ${err.message}`);
-            }
-            clearInterval(this.interval);
-        });
+        this.swap();
+        clearInterval(this.interval);
     }
     showConfirm() {
         this.confirm.style.display = "flex";
@@ -146,15 +136,25 @@ class FeedController {
         }
     }
     resetTimer() {
-        this.hideConfirm();
-        this.buttonState = "stop";
-        this.stopTimer();
-        this.time = 0;
-        this.startTime = "";
-        this.timer.innerHTML = "00:00";
-        this.volume.value = "";
-        this.wee.checked = false;
-        this.poo.checked = false;
+        return __awaiter(this, void 0, void 0, function* () {
+            this.hideConfirm();
+            this.buttonState = "stop";
+            this.stopTimer();
+            this.time = 0;
+            this.startTime = "";
+            this.timer.innerHTML = "00:00";
+            this.volume.value = "";
+            this.wee.checked = false;
+            this.poo.checked = false;
+            try {
+                yield this.wakeLock.release();
+                this.wakeLock = null;
+            }
+            catch (err) {
+                // The Wake Lock request has failed - usually system related, such as battery.
+                console.log(`${err.name}, ${err.message}`);
+            }
+        });
     }
     gatherData() {
         if (this.volume.value === "") {
@@ -173,10 +173,20 @@ class FeedController {
         };
     }
     submitData() {
-        this.hideConfirm();
-        console.log(this.gatherData());
-        this.excelController.submitData(this.gatherData());
-        this.resetTimer();
+        return __awaiter(this, void 0, void 0, function* () {
+            this.hideConfirm();
+            try {
+                yield this.wakeLock.release();
+                this.wakeLock = null;
+            }
+            catch (err) {
+                // The Wake Lock request has failed - usually system related, such as battery.
+                console.log(`${err.name}, ${err.message}`);
+            }
+            console.log(this.gatherData());
+            this.excelController.submitData(this.gatherData());
+            this.resetTimer();
+        });
     }
 }
 const myFeedTimer = new FeedController();

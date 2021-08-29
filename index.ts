@@ -145,15 +145,8 @@ class FeedController {
     }, 1000);
   }
 
-  private async stopTimer(){
+  private stopTimer(){
     this.swap();
-    try {
-      await this.wakeLock.release();
-      this.wakeLock = null;
-    } catch (err) {
-      // The Wake Lock request has failed - usually system related, such as battery.
-      console.log(`${err.name}, ${err.message}`);
-    }
     clearInterval(this.interval);
   }
 
@@ -173,7 +166,7 @@ class FeedController {
     }
   }
 
-  private resetTimer(){
+  private async resetTimer(){
     this.hideConfirm();
     this.buttonState = "stop";
     this.stopTimer();
@@ -183,6 +176,13 @@ class FeedController {
     this.volume.value = "";
     this.wee.checked = false;
     this.poo.checked = false;
+    try {
+      await this.wakeLock.release();
+      this.wakeLock = null;
+    } catch (err) {
+      // The Wake Lock request has failed - usually system related, such as battery.
+      console.log(`${err.name}, ${err.message}`);
+    }
   }
 
   private gatherData(): Payload {
@@ -205,8 +205,15 @@ class FeedController {
     }
   }
 
-  private submitData(){
+  private async submitData(){
     this.hideConfirm();
+    try {
+      await this.wakeLock.release();
+      this.wakeLock = null;
+    } catch (err) {
+      // The Wake Lock request has failed - usually system related, such as battery.
+      console.log(`${err.name}, ${err.message}`);
+    }
     console.log(this.gatherData());
     this.excelController.submitData(this.gatherData());
     this.resetTimer();
