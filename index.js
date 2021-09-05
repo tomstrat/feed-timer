@@ -79,7 +79,8 @@ class FeedController {
     }
     getTime() {
         let date = new Date();
-        return `${date.getHours()}:${date.getMinutes()}`;
+        let mins = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
+        return `${date.getHours()}:${mins}`;
     }
     getDate() {
         let date = new Date();
