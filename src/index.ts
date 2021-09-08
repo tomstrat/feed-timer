@@ -48,6 +48,7 @@ class FeedController {
     this.buttonState = "start";
     this.excelController = new ExcelController();
     this.wakeLock = null;
+    this.timer.innerHTML = window.localStorage.getItem("duration") || "00:00";
   }
 
   private addEvents(){
@@ -115,6 +116,7 @@ class FeedController {
         seconds = `0${seconds}`;
       }
       this.timer.innerHTML = `${mins}:${seconds}`;
+      window.localStorage.setItem("duration",`${mins}:${seconds}`);
     }, 1000);
   }
 
@@ -146,6 +148,7 @@ class FeedController {
     this.time = 0;
     this.startTime = "";
     this.timer.innerHTML = "00:00";
+    window.localStorage.clear();
     this.volume.value = "";
     this.wee.checked = false;
     this.poo.checked = false;
@@ -187,6 +190,7 @@ class FeedController {
       // The Wake Lock request has failed - usually system related, such as battery.
       console.log(`${err.name}, ${err.message}`);
     }
+    window.localStorage.clear();
     console.log(this.gatherData());
     this.excelController.submitData(this.gatherData());
     this.resetTimer();
