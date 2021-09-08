@@ -1,11 +1,11 @@
 function doPost(request) {
   const params = JSON.parse(request.postData.contents);
   if (params !== undefined) { 
-    parseData(params);
-    return ContentService.createTextOutput(`${params.date},${params.time},${params.duration},${params.wee},${params.poo},${params.volume}`);
+    parseData(params.data);
+    return ContentService.createTextOutput(`${params.data.volume}, ${params.data.duration}`);
   }
   else {
-    return ContentService.createTextOutput("Oops " + JSON.stringify(request));
+    return ContentService.createTextOutput("Oops " + JSON.stringify(request)).setMimeType(ContentService.MimeType.TEXT);
   }  
 }
 
@@ -15,14 +15,14 @@ function parseData(data) {
     addOutputRow(data);
   }
   //Check for feeding
-  if(data.duration !== "0" || data.volume !== "0") {
+  if(data.duration > 0 || data.volume > 0) {
     addFeedRow(data);
   }
 }
 
 function addFeedRow(data){
-  const emptyRow = getFirstEmptyRowByColumnArray();
-  const spr = SpreadsheetApp.openById('1pfTKqezVLHVRDhetJR_KUdk4XSeXkWc6m3CZRgFLbC0').getSheetByName('Sheet1');
+  const emptyRow = getFirstEmptyRowByColumnArray("Feeds");
+  const spr = SpreadsheetApp.openById('1lWk-99O3V1OxW-H4HYNZjZO7sxPPF33BGUYSEqekk3I').getSheetByName('Feeds');
   spr.getRange(emptyRow, 1).setValue(data.date);
   spr.getRange(emptyRow, 2).setValue(data.time);
   spr.getRange(emptyRow, 3).setValue(data.duration);
@@ -31,8 +31,8 @@ function addFeedRow(data){
 }
 
 function addOutputRow(data){
-  const emptyRow = getFirstEmptyRowByColumnArray();
-  const spr = SpreadsheetApp.openById('1pfTKqezVLHVRDhetJR_KUdk4XSeXkWc6m3CZRgFLbC0').getSheetByName('Sheet2');
+  const emptyRow = getFirstEmptyRowByColumnArray("Nappies");
+  const spr = SpreadsheetApp.openById('1lWk-99O3V1OxW-H4HYNZjZO7sxPPF33BGUYSEqekk3I').getSheetByName('Nappies');
   let outputType = "";
   if(data.wee && data.poo){
     outputType = "Wee/Poo";
@@ -46,8 +46,8 @@ function addOutputRow(data){
   spr.getRange(emptyRow, 3).setValue(outputType);
 }
 
-function getFirstEmptyRowByColumnArray() {
-  const spr = SpreadsheetApp.openById('1pfTKqezVLHVRDhetJR_KUdk4XSeXkWc6m3CZRgFLbC0').getSheetByName('Sheet1');
+function getFirstEmptyRowByColumnArray(sheetName) {
+  const spr = SpreadsheetApp.openById('1lWk-99O3V1OxW-H4HYNZjZO7sxPPF33BGUYSEqekk3I').getSheetByName(sheetName);
   const column = spr.getRange('A:A');
   const values = column.getValues(); // get all data in one call
   let ct = 0;
