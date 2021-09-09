@@ -110,7 +110,7 @@ class FeedController {
       console.log(`${err.name}, ${err.message}`);
     }
     this.swap();
-    this.interval = setInterval(() => {
+    this.interval = window.setInterval(() => {
       this.time += 1;
       let mins: number | string = Math.floor(this.time / 60);
       let seconds: number | string = Math.floor(this.time % 60);
