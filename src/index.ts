@@ -44,6 +44,7 @@ class FeedController {
     this.confirmOrigin = document.querySelector(".origin") as HTMLDivElement;
     this.submit = document.querySelector(".submit") as HTMLDivElement;
     this.startTime = "";
+    this.time = 0;
     this.buttonState = "start";
     this.excelController = new ExcelController();
     this.wakeLock = null;
