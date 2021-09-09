@@ -65,6 +65,7 @@ export class DOMController {
     this._volume.value = "";
     this._wee.checked = false;
     this._poo.checked = false;
+    this.swapTo("start");
   }
   public showConfirm() {
     this.confirm.style.display = "flex";

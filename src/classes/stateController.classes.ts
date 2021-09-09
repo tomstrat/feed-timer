@@ -15,7 +15,7 @@ export class StateController {
   public clearState() {
     this.time = 0;
     this.startTime = "";
-    this.buttonState = "stop";
+    this.buttonState = "start";
   }
 
   public async lockScreen() {

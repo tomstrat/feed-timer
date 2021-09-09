@@ -17,7 +17,7 @@ export class StateController {
     clearState() {
         this.time = 0;
         this.startTime = "";
-        this.buttonState = "stop";
+        this.buttonState = "start";
     }
     lockScreen() {
         return __awaiter(this, void 0, void 0, function* () {
