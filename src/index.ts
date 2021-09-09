@@ -1,5 +1,5 @@
-import {Payload} from "./interfaces/payload.interface.js"
-import {ExcelController} from "./classes/excelController.classes.js";
+import { Payload } from "./interfaces/payload.interface.js"
+import { ExcelController } from "./classes/excelController.classes.js";
 
 class FeedController {
   private start!: HTMLDivElement;
@@ -22,17 +22,17 @@ class FeedController {
   private wakeLock!: any;
 
 
-  constructor(){
+  constructor() {
     this.setup();
     this.addEvents();
   }
 
-  private setup(){
+  private setup() {
     this.start = document.querySelector(".start") as HTMLDivElement;
     this.start.style.display = "block";
-    this.stop = document.querySelector(".stop")as HTMLDivElement;
+    this.stop = document.querySelector(".stop") as HTMLDivElement;
     this.stop.style.display = "none";
-    this.timer = document.querySelector(".timer")as HTMLDivElement;
+    this.timer = document.querySelector(".timer") as HTMLDivElement;
     this.volume = document.querySelector(".volume input") as HTMLInputElement;
     this.wee = document.querySelector(".wee") as HTMLInputElement;
     this.poo = document.querySelector(".poo") as HTMLInputElement;
@@ -42,16 +42,20 @@ class FeedController {
     this.yes = document.querySelector(".yes") as HTMLDivElement;
     this.no = document.querySelector(".no") as HTMLDivElement;
     this.confirmOrigin = document.querySelector(".origin") as HTMLDivElement;
-    this.submit = document.querySelector(".submit")as HTMLDivElement;
-    this.time = 0;
+    this.submit = document.querySelector(".submit") as HTMLDivElement;
     this.startTime = "";
     this.buttonState = "start";
     this.excelController = new ExcelController();
     this.wakeLock = null;
-    this.timer.innerHTML = window.localStorage.getItem("duration") || "00:00";
+    const timestore = window.localStorage.getItem("duration");
+    this.timer.innerHTML = timestore || "00:00";
+    if (timestore) {
+      const timesplit = timestore.split(":");
+      this.time = (parseInt(timesplit[0]) * 60) + parseInt(timesplit[1]);
+    }
   }
 
-  private addEvents(){
+  private addEvents() {
     this.start.addEventListener("click", this.startTimer.bind(this));
     this.stop.addEventListener("click", this.stopTimer.bind(this));
     this.reset.addEventListener("click", this.showConfirm.bind(this));
@@ -66,8 +70,8 @@ class FeedController {
     });
   }
 
-  private swap(){
-    if(this.buttonState === "start"){
+  private swap() {
+    if (this.buttonState === "start") {
       this.buttonState = "stop";
       this.start.style.display = "none";
       this.stop.style.display = "block";
@@ -94,8 +98,8 @@ class FeedController {
     return dateString;
   }
 
-  private async startTimer(){
-    if(this.startTime === "") {
+  private async startTimer() {
+    if (this.startTime === "") {
       this.startTime = this.getTime();
     }
     try {
@@ -109,39 +113,39 @@ class FeedController {
       this.time += 1;
       let mins: number | string = Math.floor(this.time / 60);
       let seconds: number | string = Math.floor(this.time % 60);
-      if(mins < 10){
+      if (mins < 10) {
         mins = `0${mins}`;
       }
-      if(seconds < 10){
+      if (seconds < 10) {
         seconds = `0${seconds}`;
       }
       this.timer.innerHTML = `${mins}:${seconds}`;
-      window.localStorage.setItem("duration",`${mins}:${seconds}`);
+      window.localStorage.setItem("duration", `${mins}:${seconds}`);
     }, 1000);
   }
 
-  private stopTimer(){
+  private stopTimer() {
     this.swap();
     clearInterval(this.interval);
   }
 
-  private showConfirm(){
+  private showConfirm() {
     this.confirm.style.display = "flex";
   }
 
-  private hideConfirm(){
+  private hideConfirm() {
     this.confirm.style.display = "none";
   }
 
-  private redirectConfirm(){
-    if(this.confirmOrigin.dataset.origin === "reset") {
+  private redirectConfirm() {
+    if (this.confirmOrigin.dataset.origin === "reset") {
       this.resetTimer();
     } else {
       this.submitData();
     }
   }
 
-  private async resetTimer(){
+  private async resetTimer() {
     this.hideConfirm();
     this.buttonState = "stop";
     this.stopTimer();
@@ -163,11 +167,11 @@ class FeedController {
 
   private gatherData(): Payload {
 
-    if(this.volume.value === ""){
+    if (this.volume.value === "") {
       this.volume.value = "0";
     }
 
-    if(this.startTime === ""){
+    if (this.startTime === "") {
       this.startTime = this.getTime();
     }
 
@@ -181,7 +185,7 @@ class FeedController {
     }
   }
 
-  private async submitData(){
+  private async submitData() {
     this.hideConfirm();
     try {
       await this.wakeLock.release();

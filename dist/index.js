@@ -29,12 +29,16 @@ class FeedController {
         this.no = document.querySelector(".no");
         this.confirmOrigin = document.querySelector(".origin");
         this.submit = document.querySelector(".submit");
-        this.time = 0;
         this.startTime = "";
         this.buttonState = "start";
         this.excelController = new ExcelController();
         this.wakeLock = null;
-        this.timer.innerHTML = window.localStorage.getItem("duration") || "00:00";
+        const timestore = window.localStorage.getItem("duration");
+        this.timer.innerHTML = timestore || "00:00";
+        if (timestore) {
+            const timesplit = timestore.split(":");
+            this.time = (parseInt(timesplit[0]) * 60) + parseInt(timesplit[1]);
+        }
     }
     addEvents() {
         this.start.addEventListener("click", this.startTimer.bind(this));
