@@ -8,103 +8,51 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { ExcelController } from "./classes/excelController.classes.js";
+import { StateController } from "./classes/stateController.classes.js";
+import { DOMController } from "./classes/domController.classes.js";
+import { Utils } from "./classes/utils.classes.js";
 class FeedController {
     constructor() {
-        this.setup();
-        this.addEvents();
-    }
-    setup() {
-        this.start = document.querySelector(".start");
-        this.start.style.display = "block";
-        this.stop = document.querySelector(".stop");
-        this.stop.style.display = "none";
-        this.timer = document.querySelector(".timer");
-        this.volume = document.querySelector(".volume input");
-        this.wee = document.querySelector(".wee");
-        this.poo = document.querySelector(".poo");
-        this.reset = document.querySelector(".reset");
-        this.confirm = document.querySelector(".confirm");
-        this.hideConfirm();
-        this.yes = document.querySelector(".yes");
-        this.no = document.querySelector(".no");
-        this.confirmOrigin = document.querySelector(".origin");
-        this.submit = document.querySelector(".submit");
-        this.startTime = "";
-        this.time = 0;
-        this.buttonState = "start";
+        this.stateController = new StateController("start", 0, "");
+        this.domController = new DOMController(this.startTimer.bind(this), this.stopTimer.bind(this), this.resetTimer.bind(this), this.submitData.bind(this));
         this.excelController = new ExcelController();
-        this.wakeLock = null;
+        this.utils = new Utils();
+        this.domController.hideConfirm();
         const timestore = window.localStorage.getItem("duration");
-        this.timer.innerHTML = timestore || "00:00";
+        this.domController.timer = timestore || "00:00";
         if (timestore) {
             const timesplit = timestore.split(":");
-            this.time = (parseInt(timesplit[0]) * 60) + parseInt(timesplit[1]);
+            this.stateController.time = (parseInt(timesplit[0]) * 60) + parseInt(timesplit[1]);
         }
-    }
-    addEvents() {
-        this.start.addEventListener("click", this.startTimer.bind(this));
-        this.stop.addEventListener("click", this.stopTimer.bind(this));
-        this.reset.addEventListener("click", this.showConfirm.bind(this));
-        this.reset.addEventListener("click", () => {
-            this.confirmOrigin.dataset.origin = "reset";
-        });
-        this.yes.addEventListener("click", this.redirectConfirm.bind(this));
-        this.no.addEventListener("click", this.hideConfirm.bind(this));
-        this.submit.addEventListener("click", this.showConfirm.bind(this));
-        this.submit.addEventListener("click", () => {
-            this.confirmOrigin.dataset.origin = "submit";
-        });
     }
     swap() {
-        if (this.buttonState === "start") {
-            this.buttonState = "stop";
-            this.start.style.display = "none";
-            this.stop.style.display = "block";
+        if (this.stateController.buttonState === "start") {
+            this.stateController.buttonState = "stop";
+            this.domController.swapTo("stop");
         }
         else {
-            this.buttonState = "start";
-            this.start.style.display = "block";
-            this.stop.style.display = "none";
+            this.stateController.buttonState = "start";
+            this.domController.swapTo("start");
         }
-    }
-    getTime() {
-        let date = new Date();
-        let mins = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
-        return `${date.getHours()}:${mins}`;
-    }
-    getDate() {
-        let date = new Date();
-        const dateString = date.toLocaleDateString("en-GB", {
-            year: "2-digit",
-            month: "2-digit",
-            day: "2-digit"
-        });
-        return dateString;
     }
     startTimer() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.startTime === "") {
-                this.startTime = this.getTime();
+            if (this.stateController.startTime === "") {
+                this.stateController.startTime = this.utils.getTime();
             }
-            try {
-                this.wakeLock = yield navigator.wakeLock.request('screen');
-            }
-            catch (err) {
-                // The Wake Lock request has failed - usually system related, such as battery.
-                console.log(`${err.name}, ${err.message}`);
-            }
+            this.stateController.lockScreen();
             this.swap();
-            this.interval = setInterval(() => {
-                this.time += 1;
-                let mins = Math.floor(this.time / 60);
-                let seconds = Math.floor(this.time % 60);
+            this.interval = window.setInterval(() => {
+                this.stateController.time += 1;
+                let mins = Math.floor(this.stateController.time / 60);
+                let seconds = Math.floor(this.stateController.time % 60);
                 if (mins < 10) {
                     mins = `0${mins}`;
                 }
                 if (seconds < 10) {
                     seconds = `0${seconds}`;
                 }
-                this.timer.innerHTML = `${mins}:${seconds}`;
+                this.domController.timer = `${mins}:${seconds}`;
                 window.localStorage.setItem("duration", `${mins}:${seconds}`);
             }, 1000);
         });
@@ -113,69 +61,36 @@ class FeedController {
         this.swap();
         clearInterval(this.interval);
     }
-    showConfirm() {
-        this.confirm.style.display = "flex";
-    }
-    hideConfirm() {
-        this.confirm.style.display = "none";
-    }
-    redirectConfirm() {
-        if (this.confirmOrigin.dataset.origin === "reset") {
-            this.resetTimer();
-        }
-        else {
-            this.submitData();
-        }
-    }
     resetTimer() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.hideConfirm();
-            this.buttonState = "stop";
+            this.domController.hideConfirm();
             this.stopTimer();
-            this.time = 0;
-            this.startTime = "";
-            this.timer.innerHTML = "00:00";
+            this.stateController.clearState();
+            this.domController.clearDOM();
             window.localStorage.clear();
-            this.volume.value = "";
-            this.wee.checked = false;
-            this.poo.checked = false;
-            try {
-                yield this.wakeLock.release();
-                this.wakeLock = null;
-            }
-            catch (err) {
-                // The Wake Lock request has failed - usually system related, such as battery.
-                console.log(`${err.name}, ${err.message}`);
-            }
+            this.stateController.releaseLock();
         });
     }
     gatherData() {
-        if (this.volume.value === "") {
-            this.volume.value = "0";
+        if (this.domController.volume === "") {
+            this.domController.volume = "0";
         }
-        if (this.startTime === "") {
-            this.startTime = this.getTime();
+        if (this.stateController.startTime === "") {
+            this.stateController.startTime = this.utils.getTime();
         }
         return {
-            date: this.getDate(),
-            time: this.startTime,
-            duration: Math.floor(this.time / 60),
-            volume: parseInt(this.volume.value),
-            wee: this.wee.checked,
-            poo: this.poo.checked
+            date: this.utils.getDate(),
+            time: this.stateController.startTime,
+            duration: Math.floor(this.stateController.time / 60),
+            volume: parseInt(this.domController.volume),
+            wee: this.domController.wee,
+            poo: this.domController.poo
         };
     }
     submitData() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.hideConfirm();
-            try {
-                yield this.wakeLock.release();
-                this.wakeLock = null;
-            }
-            catch (err) {
-                // The Wake Lock request has failed - usually system related, such as battery.
-                console.log(`${err.name}, ${err.message}`);
-            }
+            this.domController.hideConfirm();
+            this.stateController.releaseLock();
             window.localStorage.clear();
             console.log(this.gatherData());
             this.excelController.submitData(this.gatherData());
