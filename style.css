@@ -124,6 +124,21 @@ body {
   display: none;
 }
 
+.timerContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+.increment {
+  font-size: 90px;
+  background-color: rgb(184, 100, 223);
+  height: 50px;
+  width: 50px;
+  text-align: center;
+  line-height: 40px;
+  margin: 20px 20px;
+}
 .timer {
   margin-top: 20px;
   font-size: 90px;
