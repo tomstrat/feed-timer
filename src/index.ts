@@ -14,7 +14,7 @@ class FeedController {
 
   constructor() {
     this.stateController = new StateController("start", 0, "");
-    this.domController = new DOMController(this.startTimer.bind(this), this.stopTimer.bind(this), this.resetTimer.bind(this), this.submitData.bind(this));
+    this.domController = new DOMController(this.stateController, this.startTimer.bind(this), this.stopTimer.bind(this), this.resetTimer.bind(this), this.submitData.bind(this));
     this.excelController = new ExcelController();
     this.utils = new Utils();
     this.domController.hideConfirm();

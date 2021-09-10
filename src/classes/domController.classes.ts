@@ -1,5 +1,8 @@
+import { StateController } from "./stateController.classes";
+
 export class DOMController {
 
+  private stateController: StateController;
   private start: HTMLDivElement;
   private startFunc: Function;
   private stop: HTMLDivElement;
@@ -16,10 +19,13 @@ export class DOMController {
   private _poo: HTMLInputElement;
   private resetFunc: Function;
   private submitFunc: Function;
+  private plus: HTMLDivElement;
+  private minus: HTMLDivElement;
 
 
 
-  constructor(startFunc: Function, stopFunc: Function, resetFunc: Function, submitFunc: Function) {
+  constructor(stateController: StateController, startFunc: Function, stopFunc: Function, resetFunc: Function, submitFunc: Function) {
+    this.stateController = stateController;
     this.start = document.querySelector(".start") as HTMLDivElement;
     this.start.style.display = "block";
     this.startFunc = startFunc;
@@ -36,6 +42,8 @@ export class DOMController {
     this._volume = document.querySelector(".volume input") as HTMLInputElement;
     this._wee = document.querySelector(".wee") as HTMLInputElement;
     this._poo = document.querySelector(".poo") as HTMLInputElement;
+    this.plus = document.querySelector(".plus") as HTMLDivElement;
+    this.minus = document.querySelector(".minus") as HTMLDivElement;
     this.resetFunc = resetFunc;
     this.submitFunc = submitFunc;
     this.addEvents();
@@ -58,6 +66,14 @@ export class DOMController {
     this.stop.addEventListener("click", e => {
       this.stopFunc();
     });
+    this.plus.addEventListener("click", e => {
+      this.stateController.time += 60;
+      this.changeTimer("plus");
+    });
+    this.minus.addEventListener("click", e => {
+      this.stateController.time -= 60;
+      this.changeTimer("minus");
+    });
   }
 
   public clearDOM() {
@@ -78,6 +94,25 @@ export class DOMController {
       this.resetFunc();
     } else {
       this.submitFunc();
+    }
+  }
+  private changeTimer(plusminus: string){
+    const timesplit = this.timer.split(":");
+    const mins = parseInt(timesplit[0]);
+    if(plusminus === "plus"){
+      if(mins + 1 < 10){
+        this.timer = `0${mins + 1}:${timesplit[1]}`;
+      } else {
+        this.timer = `${mins + 1}:${timesplit[1]}`;
+      }
+    } else {
+      if(mins > 0){
+        if(mins - 1 < 10){
+          this.timer = `0${mins - 1}:${timesplit[1]}`;
+        } else {
+          this.timer = `${mins - 1}:${timesplit[1]}`;
+        }
+      }
     }
   }
   public swapTo(button: "start" | "stop") {
