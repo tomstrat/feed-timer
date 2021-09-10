@@ -1,5 +1,6 @@
 export class DOMController {
-    constructor(startFunc, stopFunc, resetFunc, submitFunc) {
+    constructor(stateController, startFunc, stopFunc, resetFunc, submitFunc) {
+        this.stateController = stateController;
         this.start = document.querySelector(".start");
         this.start.style.display = "block";
         this.startFunc = startFunc;
@@ -16,6 +17,8 @@ export class DOMController {
         this._volume = document.querySelector(".volume input");
         this._wee = document.querySelector(".wee");
         this._poo = document.querySelector(".poo");
+        this.plus = document.querySelector(".plus");
+        this.minus = document.querySelector(".minus");
         this.resetFunc = resetFunc;
         this.submitFunc = submitFunc;
         this.addEvents();
@@ -37,6 +40,14 @@ export class DOMController {
         this.stop.addEventListener("click", e => {
             this.stopFunc();
         });
+        this.plus.addEventListener("click", e => {
+            this.stateController.time += 60;
+            this.changeTimer("plus");
+        });
+        this.minus.addEventListener("click", e => {
+            this.stateController.time -= 60;
+            this.changeTimer("minus");
+        });
     }
     clearDOM() {
         this._timer.innerHTML = "00:00";
@@ -57,6 +68,28 @@ export class DOMController {
         }
         else {
             this.submitFunc();
+        }
+    }
+    changeTimer(plusminus) {
+        const timesplit = this._timer.innerHTML.split(":");
+        const mins = parseInt(timesplit[0]);
+        if (plusminus === "plus") {
+            if (mins + 1 < 10) {
+                this._timer.innerHTML = `0${mins + 1}:${timesplit[1]}`;
+            }
+            else {
+                this._timer.innerHTML = `${mins + 1}:${timesplit[1]}`;
+            }
+        }
+        else {
+            if (mins > 0) {
+                if (mins - 1 < 10) {
+                    this._timer.innerHTML = `0${mins - 1}:${timesplit[1]}`;
+                }
+                else {
+                    this._timer.innerHTML = `${mins - 1}:${timesplit[1]}`;
+                }
+            }
         }
     }
     swapTo(button) {

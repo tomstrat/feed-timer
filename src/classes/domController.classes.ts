@@ -97,20 +97,20 @@ export class DOMController {
     }
   }
   private changeTimer(plusminus: string){
-    const timesplit = this.timer.split(":");
+    const timesplit = this._timer.innerHTML.split(":");
     const mins = parseInt(timesplit[0]);
     if(plusminus === "plus"){
       if(mins + 1 < 10){
-        this.timer = `0${mins + 1}:${timesplit[1]}`;
+        this._timer.innerHTML = `0${mins + 1}:${timesplit[1]}`;
       } else {
-        this.timer = `${mins + 1}:${timesplit[1]}`;
+        this._timer.innerHTML = `${mins + 1}:${timesplit[1]}`;
       }
     } else {
       if(mins > 0){
         if(mins - 1 < 10){
-          this.timer = `0${mins - 1}:${timesplit[1]}`;
+          this._timer.innerHTML = `0${mins - 1}:${timesplit[1]}`;
         } else {
-          this.timer = `${mins - 1}:${timesplit[1]}`;
+          this._timer.innerHTML = `${mins - 1}:${timesplit[1]}`;
         }
       }
     }
